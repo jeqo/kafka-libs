@@ -32,7 +32,6 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: 'Build'
-        working-directory: clients
         run: ./mvnw -B --no-transfer-progress --file pom.xml verify
   release:
 #    if: startsWith(github.event.head_commit.message, '🏁 Releasing version') != true && startsWith(github.event.head_commit.message, '⬆️  Next version') != true

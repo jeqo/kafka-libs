@@ -3,8 +3,6 @@ name: 'clients:build'
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'clients/**'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -31,5 +29,4 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: 'Build'
-        working-directory: clients
         run: ./mvnw -B --no-transfer-progress --file pom.xml verify
