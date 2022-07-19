@@ -61,13 +61,12 @@ class ProgressController<K, V> implements Runnable, Closeable {
 
   void control() {
     while (running) {
-      progress.forEach(
-          (tp, control) -> {
-            long current = System.currentTimeMillis();
-            if (eval(tp, control, current)) {
-              sendControl(tp, current);
-            }
-          });
+      progress.forEach((tp, control) -> {
+        long current = System.currentTimeMillis();
+        if (eval(tp, control, current)) {
+          sendControl(tp, current);
+        }
+      });
     }
   }
 
@@ -91,8 +90,8 @@ class ProgressController<K, V> implements Runnable, Closeable {
       return config.start();
     }
     return config.backoffExponential()
-        ? config.start() + (Math.pow(2, iteration) * config.backoff())
-        : config.start() + config.backoff();
+      ? config.start() + (Math.pow(2, iteration) * config.backoff())
+      : config.start() + config.backoff();
   }
 
   public void addTopicPartition(String topic, int partition, long timestamp) {
@@ -101,7 +100,9 @@ class ProgressController<K, V> implements Runnable, Closeable {
   }
 
   public void addTopicPartition(TopicPartition tp, long ts) {
-    if (config.topicsIncluded().isEmpty() || config.topicsIncluded().contains(tp.topic())) {
+    if (
+      config.topicsIncluded().isEmpty() || config.topicsIncluded().contains(tp.topic())
+    ) {
       if (!progress.containsKey(tp)) {
         LOG.info("Topic partition {} added to progress controller", tp);
       }
@@ -112,7 +113,9 @@ class ProgressController<K, V> implements Runnable, Closeable {
   void sendControl(TopicPartition tp, long current) {
     LOG.info("Sending progress control message for {}", tp);
     var record = new ProducerRecord<K, V>(tp.topic(), tp.partition(), null, null);
-    record.headers().add("control", String.valueOf(current).getBytes(StandardCharsets.UTF_8));
+    record
+      .headers()
+      .add("control", String.valueOf(current).getBytes(StandardCharsets.UTF_8));
     producer.send(record);
   }
 
@@ -127,7 +130,6 @@ class ProgressController<K, V> implements Runnable, Closeable {
   }
 
   record Control(long started, long latest, long iteration) {
-
     public static Control create(long timestamp) {
       return new Control(timestamp, timestamp, 0);
     }

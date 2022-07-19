@@ -25,7 +25,9 @@ public record KafkaContexts(Map<String, KafkaContext> contextMap) {
   static Path kafkaContextConfig(Path home) throws IOException {
     final var context = home.resolve("kafka.json");
     if (!Files.isRegularFile(context)) {
-      System.err.println("Kafka Content configuration file doesn't exist, creating one...");
+      System.err.println(
+        "Kafka Content configuration file doesn't exist, creating one..."
+      );
       Files.write(context, emptyContext());
     }
 
@@ -85,5 +87,4 @@ public record KafkaContexts(Map<String, KafkaContext> contextMap) {
     contextMap.forEach((k, v) -> node.put(k, v.cluster().bootstrapServers()));
     return json.writeValueAsString(node);
   }
-
 }

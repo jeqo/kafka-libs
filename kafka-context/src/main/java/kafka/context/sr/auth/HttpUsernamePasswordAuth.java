@@ -6,15 +6,29 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.PasswordAuthentication;
 
-public record HttpUsernamePasswordAuth(AuthType authType, String username, String password)
-    implements SchemaRegistryAuth {
-
-  public static SchemaRegistryAuth build(AuthType authType, String username, String password) {
-    return new HttpUsernamePasswordAuth(authType, username, passwordHelper().encrypt(password));
+public record HttpUsernamePasswordAuth(
+  AuthType authType,
+  String username,
+  String password
+)
+  implements SchemaRegistryAuth {
+  public static SchemaRegistryAuth build(
+    AuthType authType,
+    String username,
+    String password
+  ) {
+    return new HttpUsernamePasswordAuth(
+      authType,
+      username,
+      passwordHelper().encrypt(password)
+    );
   }
 
   public PasswordAuthentication passwordAuth() {
-    return new PasswordAuthentication(username, passwordHelper().decrypt(password).toCharArray());
+    return new PasswordAuthentication(
+      username,
+      passwordHelper().decrypt(password).toCharArray()
+    );
   }
 
   @Override

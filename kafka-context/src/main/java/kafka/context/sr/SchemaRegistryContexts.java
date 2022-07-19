@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record SchemaRegistryContexts(Map<String, SchemaRegistryContext> contextMap) {
-
   static final ObjectMapper json = new ObjectMapper();
 
   public static SchemaRegistryContexts load(Path baseDir) throws IOException {
@@ -32,7 +31,8 @@ public record SchemaRegistryContexts(Map<String, SchemaRegistryContext> contextM
     final var context = home.resolve("schema-registry.json");
     if (!Files.isRegularFile(context)) {
       System.err.println(
-          "Schema Registry Content configuration file doesn't exist, creating one...");
+        "Schema Registry Content configuration file doesn't exist, creating one..."
+      );
       Files.write(context, emptyContext());
     }
 

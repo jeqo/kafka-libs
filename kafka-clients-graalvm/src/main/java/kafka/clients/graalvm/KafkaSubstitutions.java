@@ -35,6 +35,7 @@ import org.graalvm.nativeimage.hosted.RuntimeReflection;
 // CHECKSTYLE:OFF
 @AutomaticFeature
 final class ChecksumFeature implements Feature {
+
   @Override
   public void beforeAnalysis(BeforeAnalysisAccess access) {
     Class<?> c = access.findClassByName("java.util.zip.CRC32C");
@@ -109,7 +110,12 @@ final class NoopReporter implements MetricsReporter {
 final class AppInfoParserNoJMX {
 
   @Substitute
-  public static void registerAppInfo(String prefix, String id, Metrics metrics, long nowMs) {
+  public static void registerAppInfo(
+    String prefix,
+    String id,
+    Metrics metrics,
+    long nowMs
+  ) {
     // no-op
   }
 
