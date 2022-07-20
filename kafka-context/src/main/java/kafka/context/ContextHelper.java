@@ -1,11 +1,19 @@
 package kafka.context;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class ContextHelper {
+
+  static final ObjectMapper json = new ObjectMapper();
 
   public static Path baseDir() throws IOException {
     final var homePath = System.getProperty("user.home");
@@ -19,6 +27,37 @@ public class ContextHelper {
       Files.createDirectories(home);
     }
     return home;
+  }
+
+  public static Path contextPath(Path home, String filename) throws IOException {
+    final var context = home.resolve(filename);
+    if (!Files.isRegularFile(context)) {
+      System.err.println(
+        "Kafka Content configuration file doesn't exist, creating one..."
+      );
+      Files.write(context, emptyContext());
+    }
+
+    return context;
+  }
+
+  public static <C extends Context> Map<String, C> from(
+    Path contextPath,
+    Function<JsonNode, C> from
+  ) throws IOException {
+    final var tree = json.readTree(Files.readAllBytes(contextPath));
+    if (!tree.isArray()) {
+      throw new IllegalArgumentException("JSON is not an array");
+    }
+
+    final var array = (ArrayNode) tree;
+    final var contexts = new HashMap<String, C>(array.size());
+    for (final var node : array) {
+      final var context = from.apply(node);
+      contexts.put(context.name(), context);
+    }
+
+    return contexts;
   }
 
   public static byte[] emptyContext() {

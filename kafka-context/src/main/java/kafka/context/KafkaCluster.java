@@ -11,11 +11,11 @@ public record KafkaCluster(String bootstrapServers, KafkaAuth auth) {
     );
   }
 
-  public JsonNode toJson() {
+  public JsonNode printJson() {
     final var node = KafkaContexts.json
       .createObjectNode()
       .put("bootstrapServers", bootstrapServers);
-    node.set("auth", auth.toJson());
+    node.set("auth", auth.printJson());
     return node;
   }
 }

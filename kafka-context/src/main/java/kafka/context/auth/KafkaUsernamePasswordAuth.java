@@ -29,8 +29,8 @@ public record KafkaUsernamePasswordAuth(
   }
 
   @Override
-  public JsonNode toJson() {
-    var node = (ObjectNode) KafkaAuth.super.toJson();
+  public JsonNode printJson() {
+    var node = (ObjectNode) KafkaAuth.super.printJson();
     return node.put("username", username).put("password", password);
   }
 }

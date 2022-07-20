@@ -4,10 +4,12 @@ import static kafka.context.ContextHelper.passwordHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Properties;
+import kafka.context.Context;
 import kafka.context.sr.auth.HttpUsernamePasswordAuth;
 
-public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster) {
-  static SchemaRegistryContext parse(JsonNode node) {
+public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster)
+  implements Context {
+  static SchemaRegistryContext from(JsonNode node) {
     final var name = node.get("name").textValue();
     return new SchemaRegistryContext(
       name,
@@ -15,14 +17,15 @@ public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster) 
     );
   }
 
-  public JsonNode toJson() {
+  public JsonNode printJson() {
     final var node = SchemaRegistryContexts.json
       .createObjectNode()
       .put("name", this.name);
-    node.set("cluster", cluster.toJson());
+    node.set("cluster", cluster.printJson());
     return node;
   }
 
+  @Override
   public Properties properties() {
     final var props = new Properties();
     props.put("schema.registry.url", cluster.urls());
@@ -40,6 +43,7 @@ public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster) 
     return props;
   }
 
+  @Override
   public String kcat() {
     var urls = cluster().urls();
     final var https = "https://";
@@ -54,14 +58,15 @@ public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster) 
     };
   }
 
+  @Override
   public String env(boolean includeAuth) {
     var urls = cluster().urls();
     return switch (cluster.auth().type()) {
       case BASIC_AUTH -> includeAuth
         ? """
-          export SCHEMA_REGISTRY_URL=%s
-          export SCHEMA_REGISTRY_USERNAME=%s
-          export SCHEMA_REGISTRY_PASSWORD=%s""".formatted(
+                    export SCHEMA_REGISTRY_URL=%s
+                    export SCHEMA_REGISTRY_USERNAME=%s
+                    export SCHEMA_REGISTRY_PASSWORD=%s""".formatted(
             urls,
             ((HttpUsernamePasswordAuth) cluster.auth()).username(),
             passwordHelper()

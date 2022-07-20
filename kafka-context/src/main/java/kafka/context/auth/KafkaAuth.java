@@ -2,7 +2,6 @@ package kafka.context.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kafka.context.KafkaContexts;
 
 public interface KafkaAuth {
   AuthType type();
@@ -19,7 +18,7 @@ public interface KafkaAuth {
     };
   }
 
-  default JsonNode toJson() {
+  default JsonNode printJson() {
     return new ObjectMapper().createObjectNode().put("type", type().name());
   }
 

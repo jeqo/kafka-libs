@@ -10,18 +10,19 @@ import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.security.plain.internals.PlainSaslServer;
 
-public record KafkaContext(String name, KafkaCluster cluster) {
-  static KafkaContext parse(JsonNode node) {
+public record KafkaContext(String name, KafkaCluster cluster) implements Context {
+  static KafkaContext from(JsonNode node) {
     final var name = node.get("name").textValue();
     return new KafkaContext(name, KafkaCluster.parse(node.get("cluster")));
   }
 
-  public JsonNode toJson() {
+  public JsonNode printJson() {
     final var node = KafkaContexts.json.createObjectNode().put("name", this.name);
-    node.set("cluster", cluster.toJson());
+    node.set("cluster", cluster.printJson());
     return node;
   }
 
+  @Override
   public Properties properties() {
     final var props = new Properties();
     props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
@@ -46,25 +47,27 @@ public record KafkaContext(String name, KafkaCluster cluster) {
     return props;
   }
 
+  @Override
   public String kcat() {
     return switch (cluster.auth().type()) {
       case SASL_PLAIN -> """
-          kcat -b %s -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \\
-           -X sasl.username=$KAFKA_USERNAME -X sasl.password=$KAFKA_PASSWORD \\
-           -X api.version.request=true\040""".formatted(
+                    kcat -b %s -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \\
+                     -X sasl.username=$KAFKA_USERNAME -X sasl.password=$KAFKA_PASSWORD \\
+                     -X api.version.request=true\040""".formatted(
           cluster.bootstrapServers()
         );
       default -> "kcat -b %s ".formatted(cluster.bootstrapServers());
     };
   }
 
+  @Override
   public String env(boolean includeAuth) {
     return switch (cluster.auth().type()) {
       case SASL_PLAIN -> includeAuth
         ? """
-          export KAFKA_BOOTSTRAP_SERVERS=%s
-          export KAFKA_USERNAME=%s
-          export KAFKA_PASSWORD=%s""".formatted(
+                    export KAFKA_BOOTSTRAP_SERVERS=%s
+                    export KAFKA_USERNAME=%s
+                    export KAFKA_PASSWORD=%s""".formatted(
             cluster.bootstrapServers(),
             ((KafkaUsernamePasswordAuth) cluster.auth()).username(),
             passwordHelper()

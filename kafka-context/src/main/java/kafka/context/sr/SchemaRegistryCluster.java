@@ -11,9 +11,9 @@ public record SchemaRegistryCluster(String urls, SchemaRegistryAuth auth) {
     );
   }
 
-  public JsonNode toJson() {
+  public JsonNode printJson() {
     final var node = SchemaRegistryContexts.json.createObjectNode().put("urls", urls);
-    node.set("auth", auth.toJson());
+    node.set("auth", auth.printJson());
     return node;
   }
 }

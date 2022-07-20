@@ -1,90 +1,114 @@
 package kafka.context;
 
 import static kafka.context.ContextHelper.baseDir;
-import static kafka.context.ContextHelper.emptyContext;
-import static kafka.context.ContextHelper.passwordHelper;
+import static kafka.context.ContextHelper.contextPath;
+import static kafka.context.ContextHelper.from;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-public record KafkaContexts(Map<String, KafkaContext> contextMap) {
+/**
+ * Kafka contexts file-based store
+ */
+public final class KafkaContexts implements Contexts<KafkaContext> {
+
   static final ObjectMapper json = new ObjectMapper();
+  public static final String CONTEXT_FILENAME = "kafka.json";
+  private final Map<String, KafkaContext> contextMap;
 
-  public static void save(KafkaContexts contexts) throws IOException {
-    Files.write(kafkaContextConfig(baseDir()), contexts.serialize());
+  /**
+   * @param contextMap kafka contexts by name
+   */
+  KafkaContexts(Map<String, KafkaContext> contextMap) {
+    this.contextMap = contextMap;
   }
 
-  static Path kafkaContextConfig(Path home) throws IOException {
-    final var context = home.resolve("kafka.json");
-    if (!Files.isRegularFile(context)) {
-      System.err.println(
-        "Kafka Content configuration file doesn't exist, creating one..."
-      );
-      Files.write(context, emptyContext());
-    }
-
-    return context;
-  }
-
-  static KafkaContexts load(Path baseDir) throws IOException {
-    return from(Files.readAllBytes(kafkaContextConfig(baseDir)));
-  }
-
+  /**
+   * Load Kafka Contexts from files in default location.
+   *
+   * @return set of Kafka Contexts
+   * @throws IOException when file IO exceptions happen
+   */
   public static KafkaContexts load() throws IOException {
     return load(baseDir());
   }
 
-  static KafkaContexts from(byte[] bytes) throws IOException {
-    final var tree = json.readTree(bytes);
-    if (!tree.isArray()) throw new IllegalArgumentException("JSON is not an array");
-
-    final var array = (ArrayNode) tree;
-    final var contexts = new HashMap<String, KafkaContext>(array.size());
-    for (final var node : array) {
-      final var context = KafkaContext.parse(node);
-      contexts.put(context.name(), context);
-    }
-
-    return new KafkaContexts(contexts);
+  /**
+   * Load Kafka Contexts from files in {@code baseDir}
+   *
+   * @param baseDir Location to search for contexts
+   * @return set of Kafka Contexts
+   * @throws IOException when file IO exceptions happen
+   */
+  public static KafkaContexts load(Path baseDir) throws IOException {
+    return new KafkaContexts(
+      from(contextPath(baseDir, CONTEXT_FILENAME), KafkaContext::from)
+    );
   }
 
+  @Override
+  public void save(Path dir) throws IOException {
+    Files.write(contextPath(dir, CONTEXT_FILENAME), serialize());
+  }
+
+  @Override
   public String names() throws JsonProcessingException {
     return json.writeValueAsString(contextMap.keySet());
   }
 
-  public byte[] serialize() throws JsonProcessingException {
-    final var array = json.createArrayNode();
-    for (final var ctx : contextMap.values()) array.add(ctx.toJson());
-    return json.writeValueAsBytes(array);
-  }
-
+  @Override
   public void add(KafkaContext ctx) {
     contextMap.put(ctx.name(), ctx);
   }
 
+  @Override
   public KafkaContext get(String name) {
     return contextMap.get(name);
   }
 
+  @Override
   public boolean has(String name) {
     return contextMap.containsKey(name);
   }
 
+  @Override
   public void remove(String name) {
     contextMap.remove(name);
   }
 
-  public String namesAndBootstrapServers() throws JsonProcessingException {
+  @Override
+  public String printNamesAndAddresses() throws JsonProcessingException {
     final var node = json.createObjectNode();
     contextMap.forEach((k, v) -> node.put(k, v.cluster().bootstrapServers()));
     return json.writeValueAsString(node);
+  }
+
+  byte[] serialize() throws JsonProcessingException {
+    final var array = json.createArrayNode();
+    for (final var ctx : contextMap.values()) array.add(ctx.printJson());
+    return json.writeValueAsBytes(array);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (obj == null || obj.getClass() != this.getClass()) return false;
+    var that = (KafkaContexts) obj;
+    return Objects.equals(this.contextMap, that.contextMap);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(contextMap);
+  }
+
+  @Override
+  public String toString() {
+    return "KafkaContexts[" + "contextMap=" + contextMap + ']';
   }
 }

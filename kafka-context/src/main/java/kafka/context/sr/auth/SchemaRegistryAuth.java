@@ -2,7 +2,6 @@ package kafka.context.sr.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kafka.context.sr.SchemaRegistryContexts;
 
 public interface SchemaRegistryAuth {
   AuthType type();
@@ -19,7 +18,7 @@ public interface SchemaRegistryAuth {
     };
   }
 
-  default JsonNode toJson() {
+  default JsonNode printJson() {
     return new ObjectMapper().createObjectNode().put("type", type().name());
   }
 

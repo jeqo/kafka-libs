@@ -37,8 +37,8 @@ public record HttpUsernamePasswordAuth(
   }
 
   @Override
-  public JsonNode toJson() {
-    var node = (ObjectNode) SchemaRegistryAuth.super.toJson();
+  public JsonNode printJson() {
+    var node = (ObjectNode) SchemaRegistryAuth.super.printJson();
     return node.put("username", username).put("password", password);
   }
 }

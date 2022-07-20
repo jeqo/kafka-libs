@@ -1,89 +1,99 @@
 package kafka.context.sr;
 
 import static kafka.context.ContextHelper.baseDir;
-import static kafka.context.ContextHelper.emptyContext;
+import static kafka.context.ContextHelper.contextPath;
+import static kafka.context.ContextHelper.from;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import kafka.context.Contexts;
 
-public record SchemaRegistryContexts(Map<String, SchemaRegistryContext> contextMap) {
+/**
+ * Confluent Schema Registry contexts file-based store
+ */
+public final class SchemaRegistryContexts implements Contexts<SchemaRegistryContext> {
+
   static final ObjectMapper json = new ObjectMapper();
+  public static final String CONTEXT_FILENAME = "schema-registry.json";
+  private final Map<String, SchemaRegistryContext> contextMap;
 
-  public static SchemaRegistryContexts load(Path baseDir) throws IOException {
-    return from(Files.readAllBytes(schemaRegistryContextConfig(baseDir)));
+  SchemaRegistryContexts(Map<String, SchemaRegistryContext> contextMap) {
+    this.contextMap = contextMap;
   }
 
   public static SchemaRegistryContexts load() throws IOException {
     return load(baseDir());
   }
 
-  public static void save(SchemaRegistryContexts contexts) throws IOException {
-    Files.write(schemaRegistryContextConfig(baseDir()), contexts.serialize());
+  public static SchemaRegistryContexts load(Path baseDir) throws IOException {
+    return new SchemaRegistryContexts(
+      from(contextPath(baseDir, CONTEXT_FILENAME), SchemaRegistryContext::from)
+    );
   }
 
-  static Path schemaRegistryContextConfig(Path home) throws IOException {
-    final var context = home.resolve("schema-registry.json");
-    if (!Files.isRegularFile(context)) {
-      System.err.println(
-        "Schema Registry Content configuration file doesn't exist, creating one..."
-      );
-      Files.write(context, emptyContext());
-    }
-
-    return context;
+  @Override
+  public void save(Path dir) throws IOException {
+    Files.write(contextPath(dir, CONTEXT_FILENAME), serialize());
   }
 
-  static SchemaRegistryContexts from(byte[] bytes) throws IOException {
-    final var tree = json.readTree(bytes);
-    if (!tree.isArray()) {
-      throw new IllegalArgumentException("JSON is not an array");
-    }
-
-    final var array = (ArrayNode) tree;
-    final var contexts = new HashMap<String, SchemaRegistryContext>(array.size());
-    for (final var node : array) {
-      final var context = SchemaRegistryContext.parse(node);
-      contexts.put(context.name(), context);
-    }
-
-    return new SchemaRegistryContexts(contexts);
-  }
-
+  @Override
   public String names() throws JsonProcessingException {
     return json.writeValueAsString(contextMap.keySet());
   }
 
-  public byte[] serialize() throws JsonProcessingException {
-    final var array = json.createArrayNode();
-    for (final var ctx : contextMap.values()) array.add(ctx.toJson());
-    return json.writeValueAsBytes(array);
-  }
-
+  @Override
   public void add(SchemaRegistryContext ctx) {
     contextMap.put(ctx.name(), ctx);
   }
 
+  @Override
   public SchemaRegistryContext get(String name) {
     return contextMap.get(name);
   }
 
+  @Override
   public boolean has(String contextName) {
     return contextMap.containsKey(contextName);
   }
 
+  @Override
   public void remove(String name) {
     contextMap.remove(name);
   }
 
-  public String namesAndUrls() throws JsonProcessingException {
+  @Override
+  public String printNamesAndAddresses() throws JsonProcessingException {
     final var node = json.createObjectNode();
     contextMap.forEach((k, v) -> node.put(k, v.cluster().urls()));
     return json.writeValueAsString(node);
+  }
+
+  byte[] serialize() throws JsonProcessingException {
+    final var array = json.createArrayNode();
+    for (final var ctx : contextMap.values()) array.add(ctx.printJson());
+    return json.writeValueAsBytes(array);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (obj == null || obj.getClass() != this.getClass()) return false;
+    var that = (SchemaRegistryContexts) obj;
+    return Objects.equals(this.contextMap, that.contextMap);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(contextMap);
+  }
+
+  @Override
+  public String toString() {
+    return "SchemaRegistryContexts[" + "contextMap=" + contextMap + ']';
   }
 }
