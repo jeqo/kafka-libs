@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public interface Contexts<T extends Context> {
+  /**
+   * Write Kafka Contexts to configuration files
+   *
+   * @throws IOException when file IO exception happens
+   */
   default void save() throws IOException {
     save(baseDir());
   }
@@ -14,6 +19,7 @@ public interface Contexts<T extends Context> {
   /**
    * Write Kafka Contexts to configuration files
    *
+   * @param dir Path to directory where configuration files are located
    * @throws IOException when file IO exception happens
    */
   void save(Path dir) throws IOException;
