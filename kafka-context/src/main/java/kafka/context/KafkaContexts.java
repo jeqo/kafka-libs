@@ -1,7 +1,6 @@
 package kafka.context;
 
 import static kafka.context.ContextHelper.baseDir;
-import static kafka.context.ContextHelper.contextPath;
 import static kafka.context.ContextHelper.from;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
+import kafka.context.auth.KafkaNoAuth;
 
 /**
  * Kafka contexts file-based store
@@ -19,6 +19,7 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
 
   static final ObjectMapper json = new ObjectMapper();
   public static final String CONTEXT_FILENAME = "kafka.json";
+  public static final KafkaCluster CONTEXT_DEFAULT = new KafkaCluster("localhost:9092", new KafkaNoAuth());
   private final Map<String, KafkaContext> contextMap;
 
   /**
@@ -46,14 +47,27 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
    * @throws IOException when file IO exceptions happen
    */
   public static KafkaContexts load(Path baseDir) throws IOException {
-    return new KafkaContexts(
-      from(contextPath(baseDir, CONTEXT_FILENAME), KafkaContext::from)
+    final var contextPath = baseDir.resolve(CONTEXT_FILENAME);
+    if (!Files.isRegularFile(contextPath)) {
+      System.err.println(
+        "Kafka Content configuration file doesn't exist, creating one..."
+      );
+      Files.write(contextPath, createDefault().serialize());
+    }
+    return new KafkaContexts(from(contextPath, KafkaContext::from));
+  }
+
+  private static KafkaContexts createDefault() {
+    final var ctx = new KafkaContext(
+      CONTEXT_DEFAULT_NAME,
+      CONTEXT_DEFAULT
     );
+    return new KafkaContexts(Map.of(ctx.name(), ctx));
   }
 
   @Override
   public void save(Path dir) throws IOException {
-    Files.write(contextPath(dir, CONTEXT_FILENAME), serialize());
+    Files.write(dir.resolve(CONTEXT_FILENAME), serialize());
   }
 
   @Override
@@ -69,6 +83,11 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
   @Override
   public KafkaContext get(String name) {
     return contextMap.get(name);
+  }
+
+  @Override
+  public KafkaContext getDefault() {
+    return contextMap.get(CONTEXT_DEFAULT_NAME);
   }
 
   @Override
@@ -88,16 +107,27 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
     return json.writeValueAsString(node);
   }
 
-  byte[] serialize() throws JsonProcessingException {
-    final var array = json.createArrayNode();
-    for (final var ctx : contextMap.values()) array.add(ctx.printJson());
-    return json.writeValueAsBytes(array);
+  @Override
+  public byte[] serialize() throws IOException {
+    try {
+      final var array = json.createArrayNode();
+      for (final var ctx : contextMap.values()) {
+        array.add(ctx.printJson());
+      }
+      return json.writeValueAsBytes(array);
+    } catch (JsonProcessingException e) {
+      throw new IOException(e.getMessage());
+    }
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == this) return true;
-    if (obj == null || obj.getClass() != this.getClass()) return false;
+    if (obj == this) {
+      return true;
+    }
+    if (obj == null || obj.getClass() != this.getClass()) {
+      return false;
+    }
     var that = (KafkaContexts) obj;
     return Objects.equals(this.contextMap, that.contextMap);
   }

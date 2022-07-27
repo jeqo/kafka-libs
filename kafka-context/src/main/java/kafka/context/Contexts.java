@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public interface Contexts<T extends Context> {
+  String CONTEXT_DEFAULT_NAME = "default";
+
   /**
    * Write Kafka Contexts to configuration files
    *
@@ -48,6 +50,13 @@ public interface Contexts<T extends Context> {
   Context get(String name);
 
   /**
+   * Get context named "default" or the first one defined in the config file
+   *
+   * @return Context or null if not found
+   */
+  Context getDefault();
+
+  /**
    * Checks if context exists by name
    *
    * @param name Context name
@@ -69,4 +78,6 @@ public interface Contexts<T extends Context> {
    * @throws JsonProcessingException if there's an issue with JSON representation
    */
   String printNamesAndAddresses() throws JsonProcessingException;
+
+  byte[] serialize() throws IOException;
 }

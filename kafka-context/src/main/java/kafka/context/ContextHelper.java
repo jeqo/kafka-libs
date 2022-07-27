@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -23,22 +22,10 @@ public class ContextHelper {
 
     final var home = Path.of(homePath, ".kafka");
     if (!Files.isDirectory(home)) {
-      System.err.println("Kafka Context directory doesn't exist, creating one...");
+      System.err.println("Contexts directory doesn't exist, creating one...");
       Files.createDirectories(home);
     }
     return home;
-  }
-
-  public static Path contextPath(Path home, String filename) throws IOException {
-    final var context = home.resolve(filename);
-    if (!Files.isRegularFile(context)) {
-      System.err.println(
-        "Kafka Content configuration file doesn't exist, creating one..."
-      );
-      Files.write(context, emptyContext());
-    }
-
-    return context;
   }
 
   public static <C extends Context> Map<String, C> from(
@@ -58,10 +45,6 @@ public class ContextHelper {
     }
 
     return contexts;
-  }
-
-  public static byte[] emptyContext() {
-    return "[]".getBytes(StandardCharsets.UTF_8);
   }
 
   public static PasswordHelper passwordHelper() {
