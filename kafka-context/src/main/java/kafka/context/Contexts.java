@@ -41,6 +41,8 @@ public interface Contexts<T extends Context> {
    */
   void add(T ctx);
 
+  void rename(String oldName, String newName);
+
   /**
    * Get context by name
    *

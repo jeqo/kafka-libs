@@ -81,6 +81,12 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
   }
 
   @Override
+  public void rename(String oldName, String newName) {
+    var ctx = contextMap.remove(oldName);
+    contextMap.put(newName, ctx);
+  }
+
+  @Override
   public KafkaContext get(String name) {
     return contextMap.get(name);
   }

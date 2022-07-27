@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
-import kafka.context.Context;
 import kafka.context.Contexts;
 import kafka.context.sr.auth.HttpNoAuth;
 
@@ -65,6 +64,13 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
   @Override
   public void add(SchemaRegistryContext ctx) {
     contextMap.put(ctx.name(), ctx);
+  }
+
+
+  @Override
+  public void rename(String oldName, String newName) {
+    var ctx = contextMap.remove(oldName);
+    contextMap.put(newName, ctx);
   }
 
   @Override
