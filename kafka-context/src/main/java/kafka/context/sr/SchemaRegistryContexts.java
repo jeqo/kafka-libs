@@ -70,7 +70,7 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
   @Override
   public void rename(String oldName, String newName) {
     var ctx = contextMap.remove(oldName);
-    contextMap.put(newName, ctx);
+    contextMap.put(newName, ctx.withName(newName));
   }
 
   @Override

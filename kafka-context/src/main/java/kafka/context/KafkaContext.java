@@ -79,4 +79,8 @@ public record KafkaContext(String name, KafkaCluster cluster) implements Context
         );
     };
   }
+
+  KafkaContext withName(String newName) {
+    return new KafkaContext(newName, this.cluster);
+  }
 }

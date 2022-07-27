@@ -5,6 +5,7 @@ import static kafka.context.ContextHelper.passwordHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Properties;
 import kafka.context.Context;
+import kafka.context.KafkaContext;
 import kafka.context.sr.auth.HttpUsernamePasswordAuth;
 
 public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster)
@@ -75,5 +76,8 @@ public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster)
         : "export SCHEMA_REGISTRY_URL=%s".formatted(urls);
       case NO_AUTH -> "export SCHEMA_REGISTRY_URL=%s".formatted(urls);
     };
+  }
+  SchemaRegistryContext withName(String newName) {
+    return new SchemaRegistryContext(newName, this.cluster);
   }
 }

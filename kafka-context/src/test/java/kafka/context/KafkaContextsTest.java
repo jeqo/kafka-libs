@@ -41,4 +41,15 @@ class KafkaContextsTest {
     assertThat(ctx).isNotNull();
   }
 
+  @Test void shouldRenameSaveAndLoadExisting() throws IOException {
+    final var tmpDir = Files.createTempDirectory("kfk-ctx");
+    final var ctxs = KafkaContexts.load(tmpDir);
+    ctxs.add(new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth())));
+    ctxs.rename("local", "other");
+    ctxs.save(tmpDir);
+
+    final var ctxs2 = KafkaContexts.load(tmpDir);
+    final var ctx = ctxs2.get("other");
+    assertThat(ctx).isNotNull();
+  }
 }

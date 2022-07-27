@@ -41,4 +41,16 @@ class SchemaRegistryContextsTest {
     final var ctx = ctxs2.get("local");
     assertThat(ctx).isNotNull();
   }
+
+  @Test void shouldRenameSaveAndLoadExisting() throws IOException {
+    final var tmpDir = Files.createTempDirectory("kfk-ctx");
+    final var ctxs = SchemaRegistryContexts.load(tmpDir);
+    ctxs.add(new SchemaRegistryContext("local", new SchemaRegistryCluster("http://local:8081", new HttpNoAuth())));
+    ctxs.rename("local", "other");
+    ctxs.save(tmpDir);
+
+    final var ctxs2 = SchemaRegistryContexts.load(tmpDir);
+    final var ctx = ctxs2.get("other");
+    assertThat(ctx).isNotNull();
+  }
 }
