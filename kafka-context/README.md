@@ -67,5 +67,4 @@ public class App {
 
 ## Tooling
 
-- `kfk-ctx` CLI: <https://github.com/jeqo/kafka-cli/tree/main/context>
-  - Manages contexts via command-line
+- [`kfk-ctx`](https://github.com/jeqo/kafka-cli/tree/main/context) CLI: Manages contexts via command-line
