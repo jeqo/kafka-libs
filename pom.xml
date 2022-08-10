@@ -12,7 +12,7 @@
   <inceptionYear>2021</inceptionYear>
 
   <properties>
-    <project.github.repository>jeqo/poc-apache-kafka</project.github.repository>
+    <project.github.repository>jeqo/kafka-libs</project.github.repository>
     <repository.url>git@github.com:${project.github.repository}.git</repository.url>
     <local.repository.path>${project.build.directory}/repository</local.repository.path>
     <nexus.url>https://s01.oss.sonatype.org</nexus.url>
@@ -57,7 +57,7 @@
   <licenses>
     <license>
       <name>Apache-2.0</name>
-      <url>https://github.com/jeqo/poc-apache-kafka/blob/main/LICENSE</url>
+      <url>https://github.com/jeqo/kafka-libs/blob/main/LICENSE</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -95,9 +95,11 @@
   <modules>
     <module>avro-graalvm</module>
     <module>kafka-clients-graalvm</module>
+    <module>connect-schema-serde</module>
     <module>schema-registry-client-graalvm</module>
     <module>kafka-context</module>
     <module>kafka-producer-progress-control</module>
+    <module>datagen-schemas</module>
   </modules>
 
   <build>
