@@ -95,11 +95,11 @@
   <modules>
     <module>avro-graalvm</module>
     <module>kafka-clients-graalvm</module>
-    <module>connect-schema-serde</module>
     <module>schema-registry-client-graalvm</module>
     <module>kafka-context</module>
     <module>kafka-producer-progress-control</module>
     <module>datagen-schemas</module>
+    <module>connect-schema-serde</module>
   </modules>
 
   <build>
