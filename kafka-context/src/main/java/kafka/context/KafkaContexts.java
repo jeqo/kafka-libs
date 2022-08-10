@@ -20,7 +20,10 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
 
   static final ObjectMapper json = new ObjectMapper();
   public static final String CONTEXT_FILENAME = "kafka.json";
-  public static final KafkaCluster CONTEXT_DEFAULT = new KafkaCluster("localhost:9092", new KafkaNoAuth());
+  public static final KafkaCluster CONTEXT_DEFAULT = new KafkaCluster(
+    "localhost:9092",
+    new KafkaNoAuth()
+  );
   private final Map<String, KafkaContext> contextMap;
 
   /**
@@ -59,10 +62,7 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
   }
 
   private static KafkaContexts createDefault() {
-    final var ctx = new KafkaContext(
-      CONTEXT_DEFAULT_NAME,
-      CONTEXT_DEFAULT
-    );
+    final var ctx = new KafkaContext(CONTEXT_DEFAULT_NAME, CONTEXT_DEFAULT);
     return new KafkaContexts(Map.of(ctx.name(), ctx));
   }
 

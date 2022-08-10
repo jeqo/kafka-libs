@@ -5,6 +5,7 @@ import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.storage.Converter;
 
 public class SchemaAndValueSerializer implements Serializer<SchemaAndValue> {
+
   final Converter converter;
 
   public SchemaAndValueSerializer(Converter converter) {

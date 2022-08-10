@@ -7,6 +7,7 @@ import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.storage.Converter;
 
 public class SchemaAndValueSerde implements Serde<SchemaAndValue> {
+
   final Converter converter;
 
   public SchemaAndValueSerde(Converter converter) {

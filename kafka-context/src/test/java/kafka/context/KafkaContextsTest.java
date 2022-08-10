@@ -1,6 +1,5 @@
 package kafka.context;
 
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.io.IOException;
@@ -10,30 +9,37 @@ import org.junit.jupiter.api.Test;
 
 class KafkaContextsTest {
 
-  @Test void shouldLoadDefault() throws IOException {
+  @Test
+  void shouldLoadDefault() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
     final var ctx = ctxs.getDefault();
     assertThat(ctx.cluster()).isEqualTo(KafkaContexts.CONTEXT_DEFAULT);
   }
 
-  @Test void shouldLoadDefaultByName() throws IOException {
+  @Test
+  void shouldLoadDefaultByName() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
     final var ctx = ctxs.get("default");
     assertThat(ctx.cluster()).isEqualTo(KafkaContexts.CONTEXT_DEFAULT);
   }
 
-  @Test void shouldGetNullWhenNotExists() throws IOException {
+  @Test
+  void shouldGetNullWhenNotExists() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
     final var ctx = ctxs.get("NON_EXISTING");
     assertThat(ctx).isNull();
   }
-  @Test void shouldSaveAndLoadExisting() throws IOException {
+
+  @Test
+  void shouldSaveAndLoadExisting() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
-    ctxs.add(new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth())));
+    ctxs.add(
+      new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth()))
+    );
     ctxs.save(tmpDir);
 
     final var ctxs2 = KafkaContexts.load(tmpDir);
@@ -41,10 +47,13 @@ class KafkaContextsTest {
     assertThat(ctx).isNotNull();
   }
 
-  @Test void shouldRenameSaveAndLoadExisting() throws IOException {
+  @Test
+  void shouldRenameSaveAndLoadExisting() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
-    ctxs.add(new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth())));
+    ctxs.add(
+      new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth()))
+    );
     ctxs.rename("local", "other");
     ctxs.save(tmpDir);
 

@@ -8,7 +8,8 @@ import kafka.serde.connect.SchemaAndValueSerde;
 public class AvroConverterExample {
 
   public static void main(String[] args) {
-    var data = ksql.StockTrade.newBuilder()
+    var data = ksql.StockTrade
+      .newBuilder()
       .setAccount("123")
       .setPrice(100)
       .setQuantity(1)
@@ -19,9 +20,7 @@ public class AvroConverterExample {
     var avro = new AvroData(10);
     var schemaAndValue = avro.toConnectData(data.getSchema(), data);
     var converter = new AvroConverter();
-    converter.configure(Map.of(
-      "schema.registry.url", "http://localhost:8081"
-    ), false);
+    converter.configure(Map.of("schema.registry.url", "http://localhost:8081"), false);
     try (var serde = new SchemaAndValueSerde(converter)) {
       var bytes = serde.serializer().serialize("test", schemaAndValue);
       System.out.println(new String(bytes));

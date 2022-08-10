@@ -20,8 +20,10 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
 
   static final ObjectMapper json = new ObjectMapper();
   public static final String CONTEXT_FILENAME = "schema-registry.json";
-  public static final SchemaRegistryCluster CONTEXT_DEFAULT = new SchemaRegistryCluster("http://localhost:8081",
-    new HttpNoAuth());
+  public static final SchemaRegistryCluster CONTEXT_DEFAULT = new SchemaRegistryCluster(
+    "http://localhost:8081",
+    new HttpNoAuth()
+  );
   private final Map<String, SchemaRegistryContext> contextMap;
 
   SchemaRegistryContexts(Map<String, SchemaRegistryContext> contextMap) {
@@ -44,10 +46,7 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
   }
 
   private static SchemaRegistryContexts createDefault() {
-    final var ctx = new SchemaRegistryContext(
-      CONTEXT_DEFAULT_NAME,
-      CONTEXT_DEFAULT
-    );
+    final var ctx = new SchemaRegistryContext(CONTEXT_DEFAULT_NAME, CONTEXT_DEFAULT);
     return new SchemaRegistryContexts(Map.of(ctx.name(), ctx));
   }
 
@@ -65,7 +64,6 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
   public void add(SchemaRegistryContext ctx) {
     contextMap.put(ctx.name(), ctx);
   }
-
 
   @Override
   public void rename(String oldName, String newName) {
