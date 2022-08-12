@@ -4,6 +4,7 @@ import io.confluent.connect.avro.AvroConverter;
 import io.confluent.connect.avro.AvroData;
 import java.util.Map;
 import kafka.serde.connect.SchemaAndValueSerde;
+import kafka.serde.connect.util.Requirements;
 
 public class AvroConverterExample {
 
@@ -23,7 +24,8 @@ public class AvroConverterExample {
     converter.configure(Map.of("schema.registry.url", "http://localhost:8081"), false);
     try (var serde = new SchemaAndValueSerde(converter)) {
       var bytes = serde.serializer().serialize("test", schemaAndValue);
-      System.out.println(new String(bytes));
+      var value = serde.deserializer().deserialize("test", bytes);
+      System.out.println(Requirements.requireStruct(value.value(), "test").get("account"));
     }
   }
 }
