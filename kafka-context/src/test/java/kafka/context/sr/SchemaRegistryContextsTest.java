@@ -4,7 +4,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import kafka.context.sr.auth.HttpNoAuth;
 import org.junit.jupiter.api.Test;
 
 class SchemaRegistryContextsTest {

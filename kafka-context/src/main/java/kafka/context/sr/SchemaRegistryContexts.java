@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import kafka.context.Contexts;
-import kafka.context.sr.auth.HttpNoAuth;
 
 /**
  * Confluent Schema Registry contexts file-based store

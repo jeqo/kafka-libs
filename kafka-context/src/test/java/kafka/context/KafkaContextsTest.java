@@ -4,7 +4,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import kafka.context.auth.KafkaNoAuth;
+import java.nio.file.Path;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class KafkaContextsTest {
@@ -60,5 +61,25 @@ class KafkaContextsTest {
     final var ctxs2 = KafkaContexts.load(tmpDir);
     final var ctx = ctxs2.get("other");
     assertThat(ctx).isNotNull();
+  }
+
+  @Test
+  void shouldGenerateSslCertificateAuth() throws IOException {
+    final var tmpDir = Files.createTempDirectory("kfk-ctx");
+    final var ctxs = KafkaContexts.load(tmpDir);
+    ctxs.add(
+      new KafkaContext(
+        "local",
+        new KafkaCluster(
+          "http://local:8081",
+          new KafkaCertificateAuth(
+            Path.of("key.pem"),
+            Path.of("cert.pem"),
+            Optional.empty()
+          )
+        )
+      )
+    );
+    System.out.println(ctxs.get("local").properties());
   }
 }

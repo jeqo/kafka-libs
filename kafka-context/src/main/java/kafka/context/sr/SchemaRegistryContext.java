@@ -5,8 +5,6 @@ import static kafka.context.ContextHelper.passwordHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Properties;
 import kafka.context.Context;
-import kafka.context.KafkaContext;
-import kafka.context.sr.auth.HttpUsernamePasswordAuth;
 
 public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster)
   implements Context {
@@ -14,7 +12,7 @@ public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster)
     final var name = node.get("name").textValue();
     return new SchemaRegistryContext(
       name,
-      SchemaRegistryCluster.parse(node.get("cluster"))
+      SchemaRegistryCluster.fromJson(node.get("cluster"))
     );
   }
 
@@ -22,7 +20,7 @@ public record SchemaRegistryContext(String name, SchemaRegistryCluster cluster)
     final var node = SchemaRegistryContexts.json
       .createObjectNode()
       .put("name", this.name);
-    node.set("cluster", cluster.printJson());
+    node.set("cluster", cluster.toJson());
     return node;
   }
 

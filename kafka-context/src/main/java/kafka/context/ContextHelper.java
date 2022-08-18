@@ -28,6 +28,14 @@ public class ContextHelper {
     return home;
   }
 
+  public static void checkFileIsAccessible(Path path) {
+    if (!Files.isRegularFile(path) || !Files.isReadable(path)) {
+      throw new IllegalArgumentException(
+        "Path [%s] to file is not readable".formatted(path.toAbsolutePath().toString())
+      );
+    }
+  }
+
   public static <C extends Context> Map<String, C> from(
     Path contextPath,
     Function<JsonNode, C> from

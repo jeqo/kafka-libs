@@ -4,21 +4,17 @@ import static kafka.context.ContextHelper.passwordHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Properties;
-import kafka.context.auth.KafkaUsernamePasswordAuth;
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.common.config.SaslConfigs;
-import org.apache.kafka.common.security.auth.SecurityProtocol;
-import org.apache.kafka.common.security.plain.internals.PlainSaslServer;
 
 public record KafkaContext(String name, KafkaCluster cluster) implements Context {
-  static KafkaContext from(JsonNode node) {
+  static KafkaContext fromJson(JsonNode node) {
     final var name = node.get("name").textValue();
-    return new KafkaContext(name, KafkaCluster.parse(node.get("cluster")));
+    return new KafkaContext(name, KafkaCluster.fromJson(node.get("cluster")));
   }
 
-  public JsonNode printJson() {
+  JsonNode toJson() {
     final var node = KafkaContexts.json.createObjectNode().put("name", this.name);
-    node.set("cluster", cluster.printJson());
+    node.set("cluster", cluster.toJson());
     return node;
   }
 
@@ -26,24 +22,7 @@ public record KafkaContext(String name, KafkaCluster cluster) implements Context
   public Properties properties() {
     final var props = new Properties();
     props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
-    switch (cluster.auth().type()) {
-      case SASL_PLAIN -> {
-        props.put(
-          CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
-          SecurityProtocol.SASL_SSL.name
-        );
-        props.put(SaslConfigs.SASL_MECHANISM, PlainSaslServer.PLAIN_MECHANISM);
-        var auth = (KafkaUsernamePasswordAuth) cluster.auth();
-        props.setProperty(
-          SaslConfigs.SASL_JAAS_CONFIG,
-          "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";".formatted(
-              auth.username(),
-              passwordHelper().decrypt(auth.password())
-            )
-        );
-      }
-      default -> {}
-    }
+    cluster.auth().addProperties(props);
     return props;
   }
 
@@ -63,17 +42,19 @@ public record KafkaContext(String name, KafkaCluster cluster) implements Context
   @Override
   public String env(boolean includeAuth) {
     return switch (cluster.auth().type()) {
-      case SASL_PLAIN -> includeAuth
-        ? """
-                    export KAFKA_BOOTSTRAP_SERVERS=%s
-                    export KAFKA_USERNAME=%s
-                    export KAFKA_PASSWORD=%s""".formatted(
-            cluster.bootstrapServers(),
-            ((KafkaUsernamePasswordAuth) cluster.auth()).username(),
-            passwordHelper()
-              .decrypt(((KafkaUsernamePasswordAuth) cluster.auth()).password())
-          )
-        : "export KAFKA_BOOTSTRAP_SERVERS=%s".formatted(cluster.bootstrapServers());
+      case SASL_PLAIN -> {
+        final var auth = (KafkaUsernamePasswordAuth) cluster.auth();
+        yield includeAuth
+          ? """
+                      export KAFKA_BOOTSTRAP_SERVERS=%s
+                      export KAFKA_USERNAME=%s
+                      export KAFKA_PASSWORD=%s""".formatted(
+              cluster.bootstrapServers(),
+              auth.username(),
+              passwordHelper().decrypt(auth.password())
+            )
+          : "export KAFKA_BOOTSTRAP_SERVERS=%s".formatted(cluster.bootstrapServers());
+      }
       default -> "export KAFKA_BOOTSTRAP_SERVERS=%s".formatted(
           cluster.bootstrapServers()
         );

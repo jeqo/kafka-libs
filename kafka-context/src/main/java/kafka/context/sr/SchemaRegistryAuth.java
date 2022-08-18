@@ -1,20 +1,20 @@
-package kafka.context.auth;
+package kafka.context.sr;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public interface KafkaAuth {
+public interface SchemaRegistryAuth {
   AuthType type();
 
-  static KafkaAuth parse(JsonNode auth) {
+  static SchemaRegistryAuth parse(JsonNode auth) {
     final var type = AuthType.valueOf(auth.get("type").textValue());
     return switch (type) {
-      case SASL_PLAIN -> new KafkaUsernamePasswordAuth(
+      case BASIC_AUTH -> new HttpUsernamePasswordAuth(
         type,
         auth.get("username").textValue(),
         auth.get("password").textValue()
       );
-      default -> new KafkaNoAuth();
+      default -> new HttpNoAuth();
     };
   }
 
@@ -23,7 +23,7 @@ public interface KafkaAuth {
   }
 
   enum AuthType {
-    PLAINTEXT,
-    SASL_PLAIN,
+    NO_AUTH,
+    BASIC_AUTH,
   }
 }

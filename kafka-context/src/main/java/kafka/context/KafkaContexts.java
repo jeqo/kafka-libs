@@ -8,10 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Objects;
-import kafka.context.auth.KafkaNoAuth;
 
 /**
  * Kafka contexts file-based store
@@ -58,7 +56,7 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
       );
       Files.write(contextPath, createDefault().serialize());
     }
-    return new KafkaContexts(from(contextPath, KafkaContext::from));
+    return new KafkaContexts(from(contextPath, KafkaContext::fromJson));
   }
 
   private static KafkaContexts createDefault() {
@@ -119,7 +117,7 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
     try {
       final var array = json.createArrayNode();
       for (final var ctx : contextMap.values()) {
-        array.add(ctx.printJson());
+        array.add(ctx.toJson());
       }
       return json.writeValueAsBytes(array);
     } catch (JsonProcessingException e) {

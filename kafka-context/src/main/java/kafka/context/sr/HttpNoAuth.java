@@ -1,4 +1,4 @@
-package kafka.context.sr.auth;
+package kafka.context.sr;
 
 public record HttpNoAuth() implements SchemaRegistryAuth {
   @Override
