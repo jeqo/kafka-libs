@@ -1,10 +1,7 @@
 package kafka.context;
 
-import static kafka.context.ContextHelper.baseDir;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
-import java.nio.file.Path;
 
 public interface Contexts<T extends Context> {
   String CONTEXT_DEFAULT_NAME = "default";
@@ -14,17 +11,7 @@ public interface Contexts<T extends Context> {
    *
    * @throws IOException when file IO exception happens
    */
-  default void save() throws IOException {
-    save(baseDir());
-  }
-
-  /**
-   * Write Kafka Contexts to configuration files
-   *
-   * @param dir Path to directory where configuration files are located
-   * @throws IOException when file IO exception happens
-   */
-  void save(Path dir) throws IOException;
+  void save() throws IOException;
 
   /**
    * Kafka Context names

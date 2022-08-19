@@ -21,43 +21,21 @@ public record KafkaUsernamePasswordAuth(
   public static KafkaUsernamePasswordAuth build(
     String username,
     String password,
-    Truststore truststore
-  ) {
-    return new KafkaUsernamePasswordAuth(
-      username,
-      passwordHelper().encrypt(password),
-      Optional.of(truststore),
-      true
-    );
-  }
-
-  public static KafkaUsernamePasswordAuth build(String username, String password) {
-    return new KafkaUsernamePasswordAuth(
-      username,
-      passwordHelper().encrypt(password),
-      Optional.empty(),
-      true
-    );
-  }
-
-  public static KafkaUsernamePasswordAuth build(
-    String username,
-    String password,
+    Truststore truststore,
     boolean isSsl
   ) {
-    return new KafkaUsernamePasswordAuth(
-      username,
-      passwordHelper().encrypt(password),
-      Optional.empty(),
-      isSsl
-    );
+    return new KafkaUsernamePasswordAuth(username, password, Optional.of(truststore), isSsl);
+  }
+
+  public static KafkaUsernamePasswordAuth build(String username, String password, boolean isSsl) {
+    return new KafkaUsernamePasswordAuth(username, password, Optional.empty(), isSsl);
   }
 
   static KafkaAuth fromJson(JsonNode auth) {
     return new KafkaUsernamePasswordAuth(
       auth.get("username").textValue(),
-      auth.get("password").textValue(),
-      Optional.ofNullable(auth.get("truststore")).map(Truststore::parse),
+      passwordHelper().decrypt(auth.get("password").textValue()),
+      Optional.ofNullable(auth.get("truststore")).map(Truststore::fromJson),
       !auth.has("ssl") || auth.get("ssl").asBoolean()
     );
   }
@@ -68,9 +46,11 @@ public record KafkaUsernamePasswordAuth(
   }
 
   @Override
-  public JsonNode printJson() {
-    var node = (ObjectNode) KafkaAuth.super.printJson();
-    return node.put("username", username).put("password", password);
+  public JsonNode toJson() {
+    var node = (ObjectNode) KafkaAuth.super.toJson();
+    node.put("username", username).put("password", passwordHelper().encrypt(password)).put("ssl", isSsl);
+    truststore.ifPresent(ts -> node.set("truststore", ts.toJson()));
+    return node;
   }
 
   @Override
@@ -84,7 +64,7 @@ public record KafkaUsernamePasswordAuth(
       SaslConfigs.SASL_JAAS_CONFIG,
       "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";".formatted(
           username,
-          passwordHelper().decrypt(password)
+          password
         )
     );
     truststore.ifPresent(value -> value.addProperties(props));

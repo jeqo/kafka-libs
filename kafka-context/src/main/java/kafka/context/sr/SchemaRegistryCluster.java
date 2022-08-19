@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public record SchemaRegistryCluster(String urls, SchemaRegistryAuth auth) {
   static SchemaRegistryCluster fromJson(JsonNode cluster) {
-    return new SchemaRegistryCluster(
-      cluster.get("urls").textValue(),
-      SchemaRegistryAuth.parse(cluster.get("auth"))
-    );
+    return new SchemaRegistryCluster(cluster.get("urls").textValue(), SchemaRegistryAuth.parse(cluster.get("auth")));
   }
 
   public JsonNode toJson() {

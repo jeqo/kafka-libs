@@ -17,7 +17,7 @@ public interface KafkaAuth {
     };
   }
 
-  default JsonNode printJson() {
+  default JsonNode toJson() {
     return new ObjectMapper().createObjectNode().put("type", type().name());
   }
 

@@ -23,9 +23,11 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
     "http://localhost:8081",
     new HttpNoAuth()
   );
+  private final Path baseDir;
   private final Map<String, SchemaRegistryContext> contextMap;
 
-  SchemaRegistryContexts(Map<String, SchemaRegistryContext> contextMap) {
+  SchemaRegistryContexts(Path baseDir, Map<String, SchemaRegistryContext> contextMap) {
+    this.baseDir = baseDir;
     this.contextMap = contextMap;
   }
 
@@ -36,22 +38,20 @@ public final class SchemaRegistryContexts implements Contexts<SchemaRegistryCont
   public static SchemaRegistryContexts load(Path baseDir) throws IOException {
     final var contextPath = baseDir.resolve(CONTEXT_FILENAME);
     if (!Files.isRegularFile(contextPath)) {
-      System.err.println(
-        "Schema registry contexts configuration file doesn't exist, creating one..."
-      );
-      Files.write(contextPath, createDefault().serialize());
+      System.err.println("Schema registry contexts configuration file doesn't exist, creating one...");
+      Files.write(contextPath, init(baseDir).serialize());
     }
-    return new SchemaRegistryContexts(from(contextPath, SchemaRegistryContext::from));
+    return new SchemaRegistryContexts(baseDir, from(contextPath, SchemaRegistryContext::from));
   }
 
-  private static SchemaRegistryContexts createDefault() {
+  private static SchemaRegistryContexts init(Path baseDir) {
     final var ctx = new SchemaRegistryContext(CONTEXT_DEFAULT_NAME, CONTEXT_DEFAULT);
-    return new SchemaRegistryContexts(Map.of(ctx.name(), ctx));
+    return new SchemaRegistryContexts(baseDir, Map.of(ctx.name(), ctx));
   }
 
   @Override
-  public void save(Path dir) throws IOException {
-    Files.write(dir.resolve(CONTEXT_FILENAME), serialize());
+  public void save() throws IOException {
+    Files.write(baseDir.resolve(CONTEXT_FILENAME), serialize());
   }
 
   @Override

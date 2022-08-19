@@ -38,10 +38,8 @@ class KafkaContextsTest {
   void shouldSaveAndLoadExisting() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
-    ctxs.add(
-      new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth()))
-    );
-    ctxs.save(tmpDir);
+    ctxs.add(new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth())));
+    ctxs.save();
 
     final var ctxs2 = KafkaContexts.load(tmpDir);
     final var ctx = ctxs2.get("local");
@@ -52,11 +50,9 @@ class KafkaContextsTest {
   void shouldRenameSaveAndLoadExisting() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
-    ctxs.add(
-      new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth()))
-    );
+    ctxs.add(new KafkaContext("local", new KafkaCluster("http://local:8081", new KafkaNoAuth())));
     ctxs.rename("local", "other");
-    ctxs.save(tmpDir);
+    ctxs.save();
 
     final var ctxs2 = KafkaContexts.load(tmpDir);
     final var ctx = ctxs2.get("other");
@@ -67,19 +63,15 @@ class KafkaContextsTest {
   void shouldGenerateSslCertificateAuth() throws IOException {
     final var tmpDir = Files.createTempDirectory("kfk-ctx");
     final var ctxs = KafkaContexts.load(tmpDir);
-    ctxs.add(
-      new KafkaContext(
-        "local",
-        new KafkaCluster(
-          "http://local:8081",
-          new KafkaCertificateAuth(
-            Path.of("key.pem"),
-            Path.of("cert.pem"),
-            Optional.empty()
-          )
-        )
-      )
-    );
-    System.out.println(ctxs.get("local").properties());
+    //    ctxs.add(
+    //      new KafkaContext(
+    //        "local",
+    //        new KafkaCluster(
+    //          "localhost:9071",
+    //          new KafkaCertificateAuth(Path.of("key.pem"), Path.of("cert.pem"), Optional.empty())
+    //        )
+    //      )
+    //    );
+    //    System.out.println(ctxs.get("local").properties());
   }
 }

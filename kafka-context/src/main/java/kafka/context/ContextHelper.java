@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,7 +21,7 @@ public class ContextHelper {
       throw new IllegalStateException("Can't find user's home. ${HOME} is empty");
     }
 
-    final var home = Path.of(homePath, ".kafka");
+    final var home = Path.of(homePath, ".config/kfk-ctx");
     if (!Files.isDirectory(home)) {
       System.err.println("Contexts directory doesn't exist, creating one...");
       Files.createDirectories(home);
@@ -36,10 +37,8 @@ public class ContextHelper {
     }
   }
 
-  public static <C extends Context> Map<String, C> from(
-    Path contextPath,
-    Function<JsonNode, C> from
-  ) throws IOException {
+  public static <C extends Context> Map<String, C> from(Path contextPath, Function<JsonNode, C> from)
+    throws IOException {
     final var tree = json.readTree(Files.readAllBytes(contextPath));
     if (!tree.isArray()) {
       throw new IllegalArgumentException("JSON is not an array");
@@ -66,7 +65,7 @@ public class ContextHelper {
         final var salt = Files.readString(saltPath);
         return new PasswordHelper(salt);
       }
-    } catch (IOException e) {
+    } catch (IOException | NoSuchAlgorithmException e) {
       throw new IllegalStateException("Password helper not loading", e);
     }
   }

@@ -18,16 +18,16 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
 
   static final ObjectMapper json = new ObjectMapper();
   public static final String CONTEXT_FILENAME = "kafka.json";
-  public static final KafkaCluster CONTEXT_DEFAULT = new KafkaCluster(
-    "localhost:9092",
-    new KafkaNoAuth()
-  );
+  public static final KafkaCluster CONTEXT_DEFAULT = new KafkaCluster("localhost:9092", new KafkaNoAuth());
+  private final Path baseDir;
   private final Map<String, KafkaContext> contextMap;
 
   /**
+   * @param baseDir base dir for Kafka context files
    * @param contextMap kafka contexts by name
    */
-  KafkaContexts(Map<String, KafkaContext> contextMap) {
+  KafkaContexts(Path baseDir, Map<String, KafkaContext> contextMap) {
+    this.baseDir = baseDir;
     this.contextMap = contextMap;
   }
 
@@ -51,22 +51,20 @@ public final class KafkaContexts implements Contexts<KafkaContext> {
   public static KafkaContexts load(Path baseDir) throws IOException {
     final var contextPath = baseDir.resolve(CONTEXT_FILENAME);
     if (!Files.isRegularFile(contextPath)) {
-      System.err.println(
-        "Kafka Content configuration file doesn't exist, creating one..."
-      );
-      Files.write(contextPath, createDefault().serialize());
+      System.err.println("Kafka Context configuration file doesn't exist, creating one...");
+      Files.write(contextPath, init(baseDir).serialize());
     }
-    return new KafkaContexts(from(contextPath, KafkaContext::fromJson));
+    return new KafkaContexts(baseDir, from(contextPath, KafkaContext::fromJson));
   }
 
-  private static KafkaContexts createDefault() {
+  private static KafkaContexts init(Path baseDir) {
     final var ctx = new KafkaContext(CONTEXT_DEFAULT_NAME, CONTEXT_DEFAULT);
-    return new KafkaContexts(Map.of(ctx.name(), ctx));
+    return new KafkaContexts(baseDir, Map.of(ctx.name(), ctx));
   }
 
   @Override
-  public void save(Path dir) throws IOException {
-    Files.write(dir.resolve(CONTEXT_FILENAME), serialize());
+  public void save() throws IOException {
+    Files.write(baseDir.resolve(CONTEXT_FILENAME), serialize());
   }
 
   @Override
