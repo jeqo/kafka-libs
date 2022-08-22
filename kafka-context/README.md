@@ -13,6 +13,9 @@ Kafka Context library is an attempt to provide this abstraction on top of config
 - Kafka:
   - Plaintext
   - SASL_SSL (e.g. CCloud) with username/password
+  - TLS no auth
+  - mTLS with Keystore/Truststore
+  - mTLS with Certificates (PEM)
 - Schema Registry:
   - HTTP
     - No Auth
@@ -20,11 +23,9 @@ Kafka Context library is an attempt to provide this abstraction on top of config
 
 ### Backlog
 
-- [ ] Custom SSL (using PEM)
-- [ ] SASL Scram
-- [ ] mTLS
-- [ ] Kerberos
 - [ ] OAuth
+- [ ] SASL Scram
+- [ ] Kerberos
 
 ## How to use
 

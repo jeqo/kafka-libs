@@ -42,7 +42,7 @@ public record Truststore(Optional<Keystore> truststore, Optional<Path> certifica
     certificates.ifPresent(cert -> {
       props.setProperty(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
       try {
-        props.setProperty(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, Files.readString(cert));
+        props.setProperty(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, Files.readString(cert).trim());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

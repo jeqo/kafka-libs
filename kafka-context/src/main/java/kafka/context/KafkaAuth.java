@@ -11,8 +11,9 @@ public interface KafkaAuth {
     final var type = AuthType.valueOf(auth.get("type").textValue());
     return switch (type) {
       case SASL_PLAIN -> KafkaUsernamePasswordAuth.fromJson(auth);
-      case SSL_CERTIFICATE -> KafkaCertificateAuth.fromJson(auth);
-      case SSL_KEYSTORE -> KafkaKeystoreAuth.fromJson(auth);
+      case TLS -> KafkaTlsNoAuth.fromJson(auth);
+      case MTLS_CERTIFICATE -> KafkaCertificateAuth.fromJson(auth);
+      case MTLS_KEYSTORE -> KafkaKeystoreAuth.fromJson(auth);
       default -> new KafkaNoAuth();
     };
   }
@@ -29,7 +30,8 @@ public interface KafkaAuth {
     // SASL_SCRAM,
     // SASL_KERBEROS,
     // SASL_OAUTH,
-    SSL_KEYSTORE,
-    SSL_CERTIFICATE,
+    TLS,
+    MTLS_KEYSTORE,
+    MTLS_CERTIFICATE,
   }
 }

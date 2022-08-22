@@ -37,7 +37,7 @@ public record KafkaKeystoreAuth(Keystore keystore, String keyPassword, Optional<
 
   @Override
   public AuthType type() {
-    return AuthType.SSL_KEYSTORE;
+    return AuthType.MTLS_KEYSTORE;
   }
 
   @Override
