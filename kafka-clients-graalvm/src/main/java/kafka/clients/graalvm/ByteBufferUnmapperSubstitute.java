@@ -31,8 +31,7 @@ import org.apache.kafka.common.utils.Java;
 public final class ByteBufferUnmapperSubstitute {
 
   @Substitute
-  public static void unmap(String resourceDescription, ByteBuffer buffer)
-    throws IOException {
+  public static void unmap(String resourceDescription, ByteBuffer buffer) throws IOException {
     if (!buffer.isDirect()) {
       throw new IllegalArgumentException("Unmapping only works with direct buffers");
     }
@@ -58,10 +57,7 @@ public final class ByteBufferUnmapperSubstitute {
         }
       }
     } catch (Throwable throwable) {
-      throw new IOException(
-        "Unable to unmap the mapped buffer: " + resourceDescription,
-        throwable
-      );
+      throw new IOException("Unable to unmap the mapped buffer: " + resourceDescription, throwable);
     }
   }
 }

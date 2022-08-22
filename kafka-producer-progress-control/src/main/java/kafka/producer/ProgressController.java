@@ -100,9 +100,7 @@ class ProgressController<K, V> implements Runnable, Closeable {
   }
 
   public void addTopicPartition(TopicPartition tp, long ts) {
-    if (
-      config.topicsIncluded().isEmpty() || config.topicsIncluded().contains(tp.topic())
-    ) {
+    if (config.topicsIncluded().isEmpty() || config.topicsIncluded().contains(tp.topic())) {
       if (!progress.containsKey(tp)) {
         LOG.info("Topic partition {} added to progress controller", tp);
       }
@@ -113,9 +111,7 @@ class ProgressController<K, V> implements Runnable, Closeable {
   void sendControl(TopicPartition tp, long current) {
     LOG.info("Sending progress control message for {}", tp);
     var record = new ProducerRecord<K, V>(tp.topic(), tp.partition(), null, null);
-    record
-      .headers()
-      .add("control", String.valueOf(current).getBytes(StandardCharsets.UTF_8));
+    record.headers().add("control", String.valueOf(current).getBytes(StandardCharsets.UTF_8));
     producer.send(record);
   }
 

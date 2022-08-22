@@ -17,8 +17,7 @@ public record ProgressControlConfig(
   public static final String END_MS_CONFIG = "progress.control.end.ms";
   public static final String BACKOFF_MS_CONFIG = "progress.control.backoff.ms";
   public static final long BACKOFF_MS_DEFAULT = 1_000;
-  public static final String BACKOFF_EXPONENTIAL_CONFIG =
-    "progress.control.backoff.exponential";
+  public static final String BACKOFF_EXPONENTIAL_CONFIG = "progress.control.backoff.exponential";
   public static final boolean BACKOFF_EXPONENTIAL_DEFAULT = false;
 
   public static final String TOPICS_INCLUDE_CONFIG = "progress.control.topics.include";
@@ -26,9 +25,7 @@ public record ProgressControlConfig(
   static ProgressControlConfig load(Map<String, ?> props) {
     var builder = newBuilder();
     if (props.containsKey(START_MS_CONFIG)) {
-      var start = Duration.ofMillis(
-        Long.parseLong(props.get(START_MS_CONFIG).toString())
-      );
+      var start = Duration.ofMillis(Long.parseLong(props.get(START_MS_CONFIG).toString()));
       builder.withStart(start);
     }
     if (props.containsKey(END_MS_CONFIG)) {

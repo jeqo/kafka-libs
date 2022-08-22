@@ -65,17 +65,11 @@ final class Target_org_apache_avro_generic_GenericDatumReader {
   }
 }
 
-@TargetClass(
-  className = "org.apache.avro.reflect.ReflectionUtil",
-  onlyWith = JDK17OrLater.class
-)
+@TargetClass(className = "org.apache.avro.reflect.ReflectionUtil", onlyWith = JDK17OrLater.class)
 final class Target_org_apache_avro_reflect_ReflectionUtil {
 
   @Substitute
-  public static <V, R> Function<V, R> getConstructorAsFunction(
-    Class<V> parameterClass,
-    Class<R> clazz
-  ) {
+  public static <V, R> Function<V, R> getConstructorAsFunction(Class<V> parameterClass, Class<R> clazz) {
     // Cannot use the method handle approach as it uses ProtectionDomain which got removed.
     try {
       Constructor<R> constructor = clazz.getConstructor(parameterClass);
@@ -85,10 +79,7 @@ final class Target_org_apache_avro_reflect_ReflectionUtil {
           try {
             return constructor.newInstance(v);
           } catch (Exception e) {
-            throw new IllegalStateException(
-              "Unable to create new instance for " + clazz,
-              e
-            );
+            throw new IllegalStateException("Unable to create new instance for " + clazz, e);
           }
         }
       };

@@ -21,16 +21,12 @@ class ProgressControllerTest {
   ProgressControllerTest() {
     final var properties = new Properties();
     properties.put("bootstrap.servers", "localhost:19092");
-    producer =
-      new KafkaProducer<>(properties, new StringSerializer(), new StringSerializer());
+    producer = new KafkaProducer<>(properties, new StringSerializer(), new StringSerializer());
   }
 
   @Test
   void shouldEvalFalse_whenDiffIsLessThanStartPeriod() {
-    final var config = ProgressControlConfig
-      .newBuilder()
-      .withStart(Duration.ofSeconds(1))
-      .build();
+    final var config = ProgressControlConfig.newBuilder().withStart(Duration.ofSeconds(1)).build();
     try (final var controller = new ProgressController<>(producer, config)) {
       final var tp = new TopicPartition("t1", 0);
       final var eval = controller.eval(tp, Control.create(0), 10);
@@ -42,10 +38,7 @@ class ProgressControllerTest {
 
   @Test
   void shouldEvalTrue_whenDiffIsHigherThanStartPeriod() {
-    final var config = ProgressControlConfig
-      .newBuilder()
-      .withStart(Duration.ofSeconds(1))
-      .build();
+    final var config = ProgressControlConfig.newBuilder().withStart(Duration.ofSeconds(1)).build();
     try (final var controller = new ProgressController<>(producer, config)) {
       final var tp = new TopicPartition("t1", 0);
       controller.addTopicPartition(tp, 0);
@@ -59,10 +52,7 @@ class ProgressControllerTest {
 
   @Test
   void shouldRemovePartition_whenEvalTrueAndNoBackoff() {
-    final var config = ProgressControlConfig
-      .newBuilder()
-      .withStart(Duration.ofSeconds(1))
-      .build();
+    final var config = ProgressControlConfig.newBuilder().withStart(Duration.ofSeconds(1)).build();
     try (final var controller = new ProgressController<>(producer, config)) {
       final var tp = new TopicPartition("t1", 0);
       controller.addTopicPartition(tp, 0);

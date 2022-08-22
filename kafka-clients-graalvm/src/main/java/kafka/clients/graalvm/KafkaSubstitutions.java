@@ -110,12 +110,7 @@ final class NoopReporter implements MetricsReporter {
 final class AppInfoParserNoJMX {
 
   @Substitute
-  public static void registerAppInfo(
-    String prefix,
-    String id,
-    Metrics metrics,
-    long nowMs
-  ) {
+  public static void registerAppInfo(String prefix, String id, Metrics metrics, long nowMs) {
     // no-op
   }
 

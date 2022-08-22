@@ -48,8 +48,7 @@ import org.slf4j.LoggerFactory;
 // Workaround for https://github.com/oracle/graal/issues/2745
 @TargetClass(value = SaslClientCallbackHandler.class)
 @SuppressWarnings("MissingJavadocType")
-public final class SaslClientCallbackHandlerSubstitute
-  implements AuthenticateCallbackHandler {
+public final class SaslClientCallbackHandlerSubstitute implements AuthenticateCallbackHandler {
 
   @Alias
   private String mechanism;
@@ -67,24 +66,16 @@ public final class SaslClientCallbackHandlerSubstitute
 
   @Override
   @Substitute
-  public void configure(
-    Map<String, ?> configs,
-    String saslMechanism,
-    List<AppConfigurationEntry> jaasConfigEntries
-  ) {
+  public void configure(Map<String, ?> configs, String saslMechanism, List<AppConfigurationEntry> jaasConfigEntries) {
     this.mechanism = saslMechanism;
     this.subject = null;
 
     int entrySize = jaasConfigEntries.size();
     if (entrySize == 0) {
-      logger.warn(
-        "Missing JAAS config entry, missing or malformed sasl.jaas.config property."
-      );
+      logger.warn("Missing JAAS config entry, missing or malformed sasl.jaas.config property.");
       return;
     } else if (entrySize > 1) {
-      logger.warn(
-        "Multiple JAAS config entries, Kafka client's sasl.jaas.config can have only one JAAS config entry."
-      );
+      logger.warn("Multiple JAAS config entries, Kafka client's sasl.jaas.config can have only one JAAS config entry.");
       return;
     }
 
@@ -100,10 +91,7 @@ public final class SaslClientCallbackHandlerSubstitute
         .newInstance()
         .initialize(subject, this, new HashMap<>(), jaasConfigEntry.getOptions());
     } catch (ReflectiveOperationException e) {
-      throw new KafkaException(
-        "Can't instantiate JAAS login module" + jaasLoginModuleName,
-        e
-      );
+      throw new KafkaException("Can't instantiate JAAS login module" + jaasLoginModuleName, e);
     }
   }
 
@@ -124,11 +112,7 @@ public final class SaslClientCallbackHandlerSubstitute
         }
       } else if (callback instanceof PasswordCallback) {
         if (subject != null && !subject.getPrivateCredentials(String.class).isEmpty()) {
-          char[] password = subject
-            .getPrivateCredentials(String.class)
-            .iterator()
-            .next()
-            .toCharArray();
+          char[] password = subject.getPrivateCredentials(String.class).iterator().next().toCharArray();
           ((PasswordCallback) callback).setPassword(password);
         } else {
           String errorMessage =
@@ -149,9 +133,7 @@ public final class SaslClientCallbackHandlerSubstitute
         }
       } else if (callback instanceof ScramExtensionsCallback) {
         if (
-          ScramMechanism.isScram(mechanism) &&
-          subject != null &&
-          !subject.getPublicCredentials(Map.class).isEmpty()
+          ScramMechanism.isScram(mechanism) && subject != null && !subject.getPublicCredentials(Map.class).isEmpty()
         ) {
           @SuppressWarnings("unchecked")
           Map<String, String> extensions = (Map<String, String>) subject
@@ -166,17 +148,11 @@ public final class SaslClientCallbackHandlerSubstitute
           subject != null &&
           !subject.getPublicCredentials(SaslExtensions.class).isEmpty()
         ) {
-          SaslExtensions extensions = subject
-            .getPublicCredentials(SaslExtensions.class)
-            .iterator()
-            .next();
+          SaslExtensions extensions = subject.getPublicCredentials(SaslExtensions.class).iterator().next();
           ((SaslExtensionsCallback) callback).extensions(extensions);
         }
       } else {
-        throw new UnsupportedCallbackException(
-          callback,
-          "Unrecognized SASL ClientCallback"
-        );
+        throw new UnsupportedCallbackException(callback, "Unrecognized SASL ClientCallback");
       }
     }
   }

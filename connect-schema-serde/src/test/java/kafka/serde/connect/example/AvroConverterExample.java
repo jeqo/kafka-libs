@@ -25,9 +25,7 @@ public class AvroConverterExample {
     try (var serde = new SchemaAndValueSerde(converter)) {
       var bytes = serde.serializer().serialize("test", schemaAndValue);
       var value = serde.deserializer().deserialize("test", bytes);
-      System.out.println(
-        Requirements.requireStruct(value.value(), "test").get("account")
-      );
+      System.out.println(Requirements.requireStruct(value.value(), "test").get("account"));
     }
   }
 }

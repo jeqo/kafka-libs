@@ -13,21 +13,9 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public class ProgressControlCallbackExample {
 
   public static void main(String[] args) throws ExecutionException, InterruptedException {
-    final var config = Map.<String, Object>of(
-      ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-      "localhost:9092"
-    );
-    try (
-      final var producer = new KafkaProducer<>(
-        config,
-        new StringSerializer(),
-        new StringSerializer()
-      )
-    ) {
-      var callback = new ProgressControlCallback<>(
-        producer,
-        ProgressControlConfig.newBuilder().build()
-      );
+    final var config = Map.<String, Object>of(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    try (final var producer = new KafkaProducer<>(config, new StringSerializer(), new StringSerializer())) {
+      var callback = new ProgressControlCallback<>(producer, ProgressControlConfig.newBuilder().build());
       producer.send(new ProducerRecord<>("input", "k1", "v1"), callback).get();
       System.out.println("wait!");
       Thread.sleep(Duration.ofMinutes(1).toMillis());
