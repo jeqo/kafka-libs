@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.jeqo.kafka</groupId>
     <artifactId>kafka-libs</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>0.6.1</version>
   </parent>
 
   <artifactId>connect-schema-serde</artifactId>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>io.github.jeqo.kafka</groupId>
       <artifactId>datagen-schemas</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
+      <version>0.6.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
