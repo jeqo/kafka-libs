@@ -30,21 +30,15 @@ public class ConsumerE2ELatencyInterceptor<K, V> implements ConsumerInterceptor<
 
   @Override
   public ConsumerRecords<K, V> onConsume(ConsumerRecords<K, V> consumerRecords) {
-    for (var record : consumerRecords) {
-
-    }
+    for (var record : consumerRecords) {}
     return consumerRecords;
   }
 
   @Override
-  public void close() {
-
-  }
+  public void close() {}
 
   @Override
-  public void onCommit(Map<TopicPartition, OffsetAndMetadata> map) {
-
-  }
+  public void onCommit(Map<TopicPartition, OffsetAndMetadata> map) {}
 
   @Override
   public void configure(Map<String, ?> config) {
@@ -52,30 +46,42 @@ public class ConsumerE2ELatencyInterceptor<K, V> implements ConsumerInterceptor<
     final MetricConfig metricConfig = new MetricConfig()
       .samples((Integer) config.get(CommonClientConfigs.METRICS_NUM_SAMPLES_CONFIG))
       .recordLevel(
-        Sensor.RecordingLevel.forName((String) config.get(CommonClientConfigs.METRICS_RECORDING_LEVEL_CONFIG)))
+        Sensor.RecordingLevel.forName((String) config.get(CommonClientConfigs.METRICS_RECORDING_LEVEL_CONFIG))
+      )
       .timeWindow((Long) config.get(CommonClientConfigs.METRICS_SAMPLE_WINDOW_MS_CONFIG), TimeUnit.MILLISECONDS);
-    final List<MetricsReporter> reporters = getConfiguredInstances(config,
+    final List<MetricsReporter> reporters = getConfiguredInstances(
+      config,
       CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG,
       MetricsReporter.class,
-      Collections.singletonMap(CommonClientConfigs.CLIENT_ID_CONFIG, clientId));
+      Collections.singletonMap(CommonClientConfigs.CLIENT_ID_CONFIG, clientId)
+    );
     final JmxReporter jmxReporter = new JmxReporter();
     jmxReporter.configure(config);
-//    reporters.add(jmxReporter);
-    final Map<String, ?> context = config.keySet().stream()
+    //    reporters.add(jmxReporter);
+    final Map<String, ?> context = config
+      .keySet()
+      .stream()
       .filter(k -> k.startsWith(CommonClientConfigs.METRICS_CONTEXT_PREFIX))
       .collect(Collectors.toMap(k -> k, config::get));
     final MetricsContext metricsContext = new KafkaMetricsContext("consumer-e2e-latency", context);
     metrics = new Metrics(metricConfig, reporters, new SystemTime(), metricsContext);
-
   }
 
-  public <T> List<T> getConfiguredInstances(Map<String, ?> config, String key, Class<T> t,
-    Map<String, Object> configOverrides) {
+  public <T> List<T> getConfiguredInstances(
+    Map<String, ?> config,
+    String key,
+    Class<T> t,
+    Map<String, Object> configOverrides
+  ) {
     return getConfiguredInstances(config, (List<String>) config.get(key), t, configOverrides);
   }
 
-  public <T> List<T> getConfiguredInstances(Map<String, ?> originals, List<String> classNames, Class<T> t,
-    Map<String, Object> configOverrides) {
+  public <T> List<T> getConfiguredInstances(
+    Map<String, ?> originals,
+    List<String> classNames,
+    Class<T> t,
+    Map<String, Object> configOverrides
+  ) {
     List<T> objects = new ArrayList<>();
     if (classNames == null) {
       return objects;
@@ -106,7 +112,8 @@ public class ConsumerE2ELatencyInterceptor<K, V> implements ConsumerInterceptor<
       o = Utils.newInstance((Class<?>) klass);
     } else {
       throw new KafkaException(
-        "Unexpected element of type " + klass.getClass().getName() + ", expected String or Class");
+        "Unexpected element of type " + klass.getClass().getName() + ", expected String or Class"
+      );
     }
     if (!t.isInstance(o)) {
       throw new KafkaException(klass + " is not an instance of " + t.getName());
