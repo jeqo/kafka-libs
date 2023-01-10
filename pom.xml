@@ -100,6 +100,7 @@
     <module>kafka-producer-progress-control</module>
     <module>datagen-schemas</module>
     <module>connect-schema-serde</module>
+    <module>consumer-e2e-latency-interceptor</module>
   </modules>
 
   <build>
